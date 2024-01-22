@@ -6,9 +6,7 @@ const targetServer = process.env.TARGET_SERVER ;
 let server = http.createServer(function (req, res) {
   proxy.web(req, res, {
     target: targetServer,
-    changeOrigin: true,
-    autoRewrite : true,
-    hostRewrite : true
+    changeOrigin: true
   });
   proxy.on('error', function (err) {
     console.log(err);
