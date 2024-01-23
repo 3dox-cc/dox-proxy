@@ -9,8 +9,7 @@ proxy.on('proxyReq', function (proxyReq, req, res, options) {
 
 let server = http.createServer(function (req, res) {
   proxy.web(req, res, {
-    target: targetServer,
-    changeOrigin: true
+    target: targetServer
   });
   proxy.on('error', function (err) {
     console.log(err);
