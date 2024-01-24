@@ -1,21 +1,40 @@
 const http = require('http');
+const { URL } = require('url');
 const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer();
-const targetServer = process.env.TARGET_SERVER;
+const targetServer = process.env.TARGET_SERVER || 'http://127.0.0.1:19099';
+const backEnd = new URL(targetServer)
 
-proxy.on('proxyReq', function (proxyReq, req, res, options) {
-  //proxyReq.setHeader('X-Special-Proxy-Header', 'foobar');
-});
+let server = http.createServer(function (req0, res0) {
+  const url = req0.url
+  const method = req0.method
 
-let server = http.createServer(function (req, res) {
-  proxy.web(req, res, {
-    target: targetServer
-  });
-  proxy.on('error', function (err) {
-    console.log(err);
-  });
+  const options = {
+    hostname: backEnd.hostname,
+    port: backEnd.port,
+    path: url,
+    method: method
+  }
+
+  const req1 = http.request(options, (res1) => {
+    res1.on('data', (chunk) => {
+      res0.write(chunk)
+    });
+    res1.on('end', () => {
+      res0.end()
+    });
+  }).on("error", (err) => {
+    console.log(err)
+    res0.end()
+  })
+  req0.on('data', (chunk) => {
+    req1.write(chunk)
+  })
+
+  req0.on('end', () => {
+    req1.end()
+  })
 });
 server.listen(19999, () => {
   console.log('listening on 19999')
 });
-
